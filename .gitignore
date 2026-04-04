@@ -1,0 +1,33 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Build
+dist/
+build/
+
+# Env
+.env
+.env.local
+
+# Prisma
+.prisma/
+migrations/
+
+# Uploads (VERY IMPORTANT)
+uploads/
+storage-node/storage/
+main-server/uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Docker
+*.pid
+
+.qodo

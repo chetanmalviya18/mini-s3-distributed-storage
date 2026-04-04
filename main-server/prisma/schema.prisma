@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model File {
+  id           String   @id @default(uuid())
+  originalName String
+  size         BigInt
+  createdAt    DateTime @default(now())
+
+  chunks Chunk[]
+}
+
+model Chunk {
+  id         String   @id @default(uuid())
+  fileId     String
+  chunkIndex Int
+  path       String
+  node       String[]
+
+  file File @relation(fields: [fileId], references: [id])
+}

@@ -1,0 +1,5 @@
+export const STORAGE_NODES = [
+  "http://localhost:4001",
+  "http://localhost:4002",
+  "http://localhost:4003",
+];
