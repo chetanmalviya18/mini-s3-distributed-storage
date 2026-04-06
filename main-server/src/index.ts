@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import fileRoutes from "./routes/file.routes";
 import { globalErrorHandler } from "./middleware/error.middleware";
 import cors from "cors";
+import logRoutes from "./routes/log.routes";
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use("/api/files", fileRoutes);
+app.use("/api/logs", logRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Mini S3 is running 🚀");

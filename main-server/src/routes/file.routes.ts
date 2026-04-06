@@ -5,6 +5,7 @@ import fs from "fs";
 import { prisma } from "../config/prisma";
 import { getChunkStream, splitFileIntoChunks } from "../services/chunk.service";
 import axios from "axios";
+import { serializeBigInt } from "../utils/serializer";
 
 const router = Router();
 
@@ -23,9 +24,10 @@ router.get("/", async (req, res, next) => {
   try {
     const files = await prisma.file.findMany({
       orderBy: { createdAt: "desc" },
+      include: { chunks: true },
     });
 
-    res.json(files);
+    res.json(serializeBigInt(files));
   } catch (err) {
     next(err);
   }

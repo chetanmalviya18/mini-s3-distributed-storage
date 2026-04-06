@@ -3,6 +3,7 @@ import path from "path";
 import { getNextNode } from "../config/loadBalancer";
 import FormData from "form-data";
 import axios from "axios";
+import { addLog } from "../utils/logger";
 
 const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -23,6 +24,7 @@ export const splitFileIntoChunks = async (
       readStream.pause();
 
       try {
+        addLog(`📦 Processing chunk ${chunkIndex}`);
         const chunkFileName = `${fileId}_chunk_${chunkIndex}`;
         const chunkPath = path.join("uploads/chunks", chunkFileName);
 
@@ -46,6 +48,9 @@ export const splitFileIntoChunks = async (
         await fs.promises.unlink(chunkPath);
 
         chunkIndex++;
+        addLog(
+          `🎯 Chunk ${chunkIndex} replicated to ${result.nodes.join(", ")}`,
+        );
         readStream.resume();
         // console.log(`Chunk ${chunkIndex} →`, uploadedNodes);
       } catch (err) {
@@ -67,17 +72,21 @@ export const getChunkStream = async (chunk: any) => {
   for (const node of chunk.node) {
     try {
       console.log(`Trying node: ${node}`);
+      addLog(`Trying node → ${node}`);
 
       const response = await axios.get(`${node}/storage/chunk/${chunk.path}`, {
         responseType: "stream",
       });
 
       console.log(`Success from: ${node}`);
+      addLog(`✅ Chunk fetched from ${node}`);
       return response.data;
     } catch (err: any) {
       console.error(`Failed to fetch from ${node}:`, err.message);
+      addLog("❌ All nodes failed for chunk");
     }
   }
+  addLog("❌ All nodes failed for chunk");
   throw new Error("All nodes failed to provide the chunk");
 };
 
@@ -92,6 +101,7 @@ export const uploadChunkToNode = async (
   for (const node of nodes) {
     try {
       console.log(`Uploading to ${node}`);
+      addLog(`Uploading chunk → ${node}`);
 
       const form = new FormData();
       form.append("chunk", fs.createReadStream(chunkPath));
@@ -107,11 +117,14 @@ export const uploadChunkToNode = async (
 
       successfulNodes.push(node);
 
+      addLog(`✅ Stored chunk in ${node}`);
+
       if (successfulNodes.length >= replicationFactor) {
         break;
       }
     } catch (err: any) {
       console.error(`Failed to upload to ${node}:`, err.message);
+      addLog(`❌ Failed upload → ${node}`);
     }
   }
 
