@@ -19,6 +19,18 @@ const upload = multer({
   // },
 });
 
+router.get("/", async (req, res, next) => {
+  try {
+    const files = await prisma.file.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.json(files);
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.route("/upload").post((req, res, next) => {
   upload.single("file")(req, res, async (err: any) => {
     if (err) return next(err);

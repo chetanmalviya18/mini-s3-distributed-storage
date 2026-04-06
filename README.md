@@ -23,4 +23,6 @@ Client → API Server → Storage Nodes → Database
 
 ## How to Run
 
-docker-compose up --build
+before running, make sure you have Docker installed and running on your machine.
+
+docker compose up --build

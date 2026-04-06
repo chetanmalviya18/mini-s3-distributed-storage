@@ -18,6 +18,7 @@ migrations/
 uploads/
 storage-node/storage/
 main-server/uploads/
+storage
 
 # OS files
 .DS_Store
@@ -31,3 +32,4 @@ logs/
 *.pid
 
 .qodo
+data/

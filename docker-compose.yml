@@ -1,14 +1,12 @@
-version: "3.8"
-
 services:
   postgres:
     image: postgres:15
     container_name: postgres_db
     restart: always
     environment:
-      - POSTGRES_USER:postgres
-      - POSTGRES_PASSWORD:postgres
-      - POSTGRES_DB:mini_s3
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=mini_s3
     ports:
       - "5432:5432"
 
@@ -26,12 +24,14 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/mini_s3
 
   storage1:
-    build: ./storage-server
+    build: ./storage-node
     container_name: storage1
     ports:
       - "4001:4000"
     environment:
       PORT: 4000
+    volumes:
+      - ./data/node1:/app/src/storage
 
   storage2:
     build: ./storage-node
@@ -40,6 +40,8 @@ services:
       - "4002:4000"
     environment:
       PORT: 4000
+    volumes:
+      - ./data/node2:/app/src/storage
 
   storage3:
     build: ./storage-node
@@ -48,3 +50,5 @@ services:
       - "4003:4000"
     environment:
       PORT: 4000
+    volumes:
+      - ./data/node3:/app/src/storage

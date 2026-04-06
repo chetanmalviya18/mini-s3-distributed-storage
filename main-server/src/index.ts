@@ -2,12 +2,14 @@ import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import fileRoutes from "./routes/file.routes";
 import { globalErrorHandler } from "./middleware/error.middleware";
+import cors from "cors";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 app.use("/api/files", fileRoutes);
 

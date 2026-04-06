@@ -1,4 +1,5 @@
-FROM node:18
+FROM node:22.12.0-alpine
+
 
 WORKDIR /app
 
@@ -7,8 +8,9 @@ RUN npm install
 
 COPY . .
 
+RUN npx prisma generate
 RUN npm run build
 
 EXPOSE 2000
 
-CMD [ "npm", "start" ]
+CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]
