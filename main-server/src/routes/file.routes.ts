@@ -6,11 +6,12 @@ import { prisma } from "../config/prisma";
 import { getChunkStream, splitFileIntoChunks } from "../services/chunk.service";
 import axios from "axios";
 import { serializeBigInt } from "../utils/serializer";
+import { v4 as uuidv4 } from "uuid";
 
 const router = Router();
 
 const upload = multer({
-  dest: "uploads/",
+  dest: "uploads/chunks",
   // fileFilter: (req, file, cb) => {
   //   if (!file.mimetype.startsWith("image/")) {
   //     return cb(new Error("Only images allowed"));
@@ -41,10 +42,12 @@ router.route("/upload").post((req, res, next) => {
     }
 
     try {
+      const publicId = uuidv4();
       const file = await prisma.file.create({
         data: {
           originalName: req.file.originalname,
           size: req.file.size,
+          publicId,
         },
       });
 
@@ -61,8 +64,11 @@ router.route("/upload").post((req, res, next) => {
 
       fs.unlinkSync(req.file.path);
 
+      const downloadLink = `${process.env.FRONTEND_URL}/file/${publicId}`;
+
       res.status(200).json({
         message: "File uploaded successfully",
+        link: downloadLink,
         fileId: file.id,
         totalChunks: chunks.length,
       });
@@ -74,14 +80,19 @@ router.route("/upload").post((req, res, next) => {
 
 router.route("/download/:id").get(async (req, res, next) => {
   try {
-    const file = await prisma.file.findUnique({
+    let file = await prisma.file.findUnique({
       where: { id: req.params.id },
       include: { chunks: true },
     });
 
     if (!file) {
-      return res.status(404).json({ message: "File not found" });
+      file = await prisma.file.findUnique({
+        where: { publicId: req.params.id },
+        include: { chunks: true },
+      });
     }
+
+    if (!file) return res.status(404).json({ message: "File not found" });
 
     const sortedChunks = file.chunks.sort(
       (a, b) => a.chunkIndex - b.chunkIndex,

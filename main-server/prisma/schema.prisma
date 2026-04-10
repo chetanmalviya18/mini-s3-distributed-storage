@@ -11,6 +11,7 @@ model File {
   id           String   @id @default(uuid())
   originalName String
   size         BigInt
+  publicId     String   @unique
   createdAt    DateTime @default(now())
 
   chunks Chunk[]
