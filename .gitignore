@@ -1,6 +1,7 @@
 # Node
 node_modules/
 npm-debug.log*
+package-lock.json
 
 # Build
 dist/
@@ -33,3 +34,4 @@ logs/
 
 .qodo
 data/
+
