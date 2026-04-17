@@ -7,6 +7,8 @@ import { getChunkStream, splitFileIntoChunks } from "../services/chunk.service";
 import axios from "axios";
 import { serializeBigInt } from "../utils/serializer";
 import { v4 as uuidv4 } from "uuid";
+import { calculateFileHash } from "../utils/fileHash";
+import { addLog } from "../utils/logger";
 
 const router = Router();
 
@@ -42,12 +44,34 @@ router.route("/upload").post((req, res, next) => {
     }
 
     try {
+      const fileHash = await calculateFileHash(req.file.path);
+      const existingFile = await prisma.file.findUnique({
+        where: { fileHash },
+      });
+
+      if (existingFile) {
+        console.log("⚡ Duplicate detected");
+        addLog("⚡ Duplicate detected");
+
+        fs.unlinkSync(req.file.path);
+
+        const downloadLink = `${process.env.FRONTEND_URL}/file/${existingFile.publicId}`;
+
+        return res.status(200).json({
+          message: "File already exists",
+          link: downloadLink,
+          fileId: existingFile.id,
+        });
+      }
+
       const publicId = uuidv4();
+
       const file = await prisma.file.create({
         data: {
           originalName: req.file.originalname,
           size: req.file.size,
           publicId,
+          fileHash,
         },
       });
 

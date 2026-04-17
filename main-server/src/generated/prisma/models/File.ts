@@ -39,6 +39,7 @@ export type FileMinAggregateOutputType = {
   originalName: string | null
   size: bigint | null
   publicId: string | null
+  fileHash: string | null
   createdAt: Date | null
 }
 
@@ -47,6 +48,7 @@ export type FileMaxAggregateOutputType = {
   originalName: string | null
   size: bigint | null
   publicId: string | null
+  fileHash: string | null
   createdAt: Date | null
 }
 
@@ -55,6 +57,7 @@ export type FileCountAggregateOutputType = {
   originalName: number
   size: number
   publicId: number
+  fileHash: number
   createdAt: number
   _all: number
 }
@@ -73,6 +76,7 @@ export type FileMinAggregateInputType = {
   originalName?: true
   size?: true
   publicId?: true
+  fileHash?: true
   createdAt?: true
 }
 
@@ -81,6 +85,7 @@ export type FileMaxAggregateInputType = {
   originalName?: true
   size?: true
   publicId?: true
+  fileHash?: true
   createdAt?: true
 }
 
@@ -89,6 +94,7 @@ export type FileCountAggregateInputType = {
   originalName?: true
   size?: true
   publicId?: true
+  fileHash?: true
   createdAt?: true
   _all?: true
 }
@@ -184,6 +190,7 @@ export type FileGroupByOutputType = {
   originalName: string
   size: bigint
   publicId: string
+  fileHash: string
   createdAt: Date
   _count: FileCountAggregateOutputType | null
   _avg: FileAvgAggregateOutputType | null
@@ -215,6 +222,7 @@ export type FileWhereInput = {
   originalName?: Prisma.StringFilter<"File"> | string
   size?: Prisma.BigIntFilter<"File"> | bigint | number
   publicId?: Prisma.StringFilter<"File"> | string
+  fileHash?: Prisma.StringFilter<"File"> | string
   createdAt?: Prisma.DateTimeFilter<"File"> | Date | string
   chunks?: Prisma.ChunkListRelationFilter
 }
@@ -224,6 +232,7 @@ export type FileOrderByWithRelationInput = {
   originalName?: Prisma.SortOrder
   size?: Prisma.SortOrder
   publicId?: Prisma.SortOrder
+  fileHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   chunks?: Prisma.ChunkOrderByRelationAggregateInput
 }
@@ -231,6 +240,7 @@ export type FileOrderByWithRelationInput = {
 export type FileWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   publicId?: string
+  fileHash?: string
   AND?: Prisma.FileWhereInput | Prisma.FileWhereInput[]
   OR?: Prisma.FileWhereInput[]
   NOT?: Prisma.FileWhereInput | Prisma.FileWhereInput[]
@@ -238,13 +248,14 @@ export type FileWhereUniqueInput = Prisma.AtLeast<{
   size?: Prisma.BigIntFilter<"File"> | bigint | number
   createdAt?: Prisma.DateTimeFilter<"File"> | Date | string
   chunks?: Prisma.ChunkListRelationFilter
-}, "id" | "publicId">
+}, "id" | "publicId" | "fileHash">
 
 export type FileOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   originalName?: Prisma.SortOrder
   size?: Prisma.SortOrder
   publicId?: Prisma.SortOrder
+  fileHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.FileCountOrderByAggregateInput
   _avg?: Prisma.FileAvgOrderByAggregateInput
@@ -261,6 +272,7 @@ export type FileScalarWhereWithAggregatesInput = {
   originalName?: Prisma.StringWithAggregatesFilter<"File"> | string
   size?: Prisma.BigIntWithAggregatesFilter<"File"> | bigint | number
   publicId?: Prisma.StringWithAggregatesFilter<"File"> | string
+  fileHash?: Prisma.StringWithAggregatesFilter<"File"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"File"> | Date | string
 }
 
@@ -269,6 +281,7 @@ export type FileCreateInput = {
   originalName: string
   size: bigint | number
   publicId: string
+  fileHash: string
   createdAt?: Date | string
   chunks?: Prisma.ChunkCreateNestedManyWithoutFileInput
 }
@@ -278,6 +291,7 @@ export type FileUncheckedCreateInput = {
   originalName: string
   size: bigint | number
   publicId: string
+  fileHash: string
   createdAt?: Date | string
   chunks?: Prisma.ChunkUncheckedCreateNestedManyWithoutFileInput
 }
@@ -287,6 +301,7 @@ export type FileUpdateInput = {
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  fileHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   chunks?: Prisma.ChunkUpdateManyWithoutFileNestedInput
 }
@@ -296,6 +311,7 @@ export type FileUncheckedUpdateInput = {
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  fileHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   chunks?: Prisma.ChunkUncheckedUpdateManyWithoutFileNestedInput
 }
@@ -305,6 +321,7 @@ export type FileCreateManyInput = {
   originalName: string
   size: bigint | number
   publicId: string
+  fileHash: string
   createdAt?: Date | string
 }
 
@@ -313,6 +330,7 @@ export type FileUpdateManyMutationInput = {
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  fileHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -321,6 +339,7 @@ export type FileUncheckedUpdateManyInput = {
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  fileHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -329,6 +348,7 @@ export type FileCountOrderByAggregateInput = {
   originalName?: Prisma.SortOrder
   size?: Prisma.SortOrder
   publicId?: Prisma.SortOrder
+  fileHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -341,6 +361,7 @@ export type FileMaxOrderByAggregateInput = {
   originalName?: Prisma.SortOrder
   size?: Prisma.SortOrder
   publicId?: Prisma.SortOrder
+  fileHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -349,6 +370,7 @@ export type FileMinOrderByAggregateInput = {
   originalName?: Prisma.SortOrder
   size?: Prisma.SortOrder
   publicId?: Prisma.SortOrder
+  fileHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -396,6 +418,7 @@ export type FileCreateWithoutChunksInput = {
   originalName: string
   size: bigint | number
   publicId: string
+  fileHash: string
   createdAt?: Date | string
 }
 
@@ -404,6 +427,7 @@ export type FileUncheckedCreateWithoutChunksInput = {
   originalName: string
   size: bigint | number
   publicId: string
+  fileHash: string
   createdAt?: Date | string
 }
 
@@ -428,6 +452,7 @@ export type FileUpdateWithoutChunksInput = {
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  fileHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -436,6 +461,7 @@ export type FileUncheckedUpdateWithoutChunksInput = {
   originalName?: Prisma.StringFieldUpdateOperationsInput | string
   size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
   publicId?: Prisma.StringFieldUpdateOperationsInput | string
+  fileHash?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -475,6 +501,7 @@ export type FileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   originalName?: boolean
   size?: boolean
   publicId?: boolean
+  fileHash?: boolean
   createdAt?: boolean
   chunks?: boolean | Prisma.File$chunksArgs<ExtArgs>
   _count?: boolean | Prisma.FileCountOutputTypeDefaultArgs<ExtArgs>
@@ -485,6 +512,7 @@ export type FileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   originalName?: boolean
   size?: boolean
   publicId?: boolean
+  fileHash?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["file"]>
 
@@ -493,6 +521,7 @@ export type FileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   originalName?: boolean
   size?: boolean
   publicId?: boolean
+  fileHash?: boolean
   createdAt?: boolean
 }, ExtArgs["result"]["file"]>
 
@@ -501,10 +530,11 @@ export type FileSelectScalar = {
   originalName?: boolean
   size?: boolean
   publicId?: boolean
+  fileHash?: boolean
   createdAt?: boolean
 }
 
-export type FileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "originalName" | "size" | "publicId" | "createdAt", ExtArgs["result"]["file"]>
+export type FileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "originalName" | "size" | "publicId" | "fileHash" | "createdAt", ExtArgs["result"]["file"]>
 export type FileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   chunks?: boolean | Prisma.File$chunksArgs<ExtArgs>
   _count?: boolean | Prisma.FileCountOutputTypeDefaultArgs<ExtArgs>
@@ -522,6 +552,7 @@ export type $FilePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     originalName: string
     size: bigint
     publicId: string
+    fileHash: string
     createdAt: Date
   }, ExtArgs["result"]["file"]>
   composites: {}
@@ -951,6 +982,7 @@ export interface FileFieldRefs {
   readonly originalName: Prisma.FieldRef<"File", 'String'>
   readonly size: Prisma.FieldRef<"File", 'BigInt'>
   readonly publicId: Prisma.FieldRef<"File", 'String'>
+  readonly fileHash: Prisma.FieldRef<"File", 'String'>
   readonly createdAt: Prisma.FieldRef<"File", 'DateTime'>
 }
     

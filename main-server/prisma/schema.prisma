@@ -12,6 +12,7 @@ model File {
   originalName String
   size         BigInt
   publicId     String   @unique
+  fileHash     String   @unique
   createdAt    DateTime @default(now())
 
   chunks Chunk[]
