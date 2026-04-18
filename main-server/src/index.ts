@@ -4,6 +4,7 @@ import fileRoutes from "./routes/file.routes";
 import { globalErrorHandler } from "./middleware/error.middleware";
 import cors from "cors";
 import logRoutes from "./routes/log.routes";
+import "./workers/cleanup.worker";
 
 dotenv.config();
 

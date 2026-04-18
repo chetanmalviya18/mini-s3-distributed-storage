@@ -14,13 +14,6 @@ const router = Router();
 
 const upload = multer({
   dest: "uploads/chunks",
-  // fileFilter: (req, file, cb) => {
-  //   if (!file.mimetype.startsWith("image/")) {
-  //     return cb(new Error("Only images allowed"));
-  //   }
-
-  //   cb(null, true);
-  // },
 });
 
 router.get("/", async (req, res, next) => {
@@ -66,12 +59,15 @@ router.route("/upload").post((req, res, next) => {
 
       const publicId = uuidv4();
 
+      const expiresAt = new Date(Date.now() + 60 * 1000);
+
       const file = await prisma.file.create({
         data: {
           originalName: req.file.originalname,
           size: req.file.size,
           publicId,
           fileHash,
+          expiresAt,
         },
       });
 
@@ -82,7 +78,7 @@ router.route("/upload").post((req, res, next) => {
           fileId: file.id,
           chunkIndex: chunk.chunkIndex,
           path: chunk.path,
-          node: chunk.node,
+          node: [chunk.node], // Wrap single node in array for DB compatibility
         })),
       });
 
@@ -118,9 +114,26 @@ router.route("/download/:id").get(async (req, res, next) => {
 
     if (!file) return res.status(404).json({ message: "File not found" });
 
+    if (new Date() > file.expiresAt) {
+      return res
+        .status(410)
+        .json({ message: "This transfer link has expired" });
+    }
+
     const sortedChunks = file.chunks.sort(
       (a, b) => a.chunkIndex - b.chunkIndex,
     );
+
+    // Group chunks by chunkIndex to handle multiple replicas
+    const chunksByIndex = new Map<number, typeof file.chunks>();
+    for (const chunk of sortedChunks) {
+      if (!chunksByIndex.has(chunk.chunkIndex)) {
+        chunksByIndex.set(chunk.chunkIndex, []);
+      }
+      chunksByIndex.get(chunk.chunkIndex)!.push(chunk);
+    }
+
+    const maxChunkIndex = Math.max(...Array.from(chunksByIndex.keys()));
 
     res.setHeader(
       "Content-Disposition",
@@ -131,25 +144,37 @@ router.route("/download/:id").get(async (req, res, next) => {
     let currentChunk = 0;
 
     const streamNextChunk = async () => {
-      if (currentChunk >= sortedChunks.length) {
+      if (currentChunk > maxChunkIndex) {
         return res.end();
       }
 
-      const chunk = sortedChunks[currentChunk];
-
-      try {
-        const stream = await getChunkStream(chunk);
-
-        stream.on("end", () => {
-          currentChunk++;
-          streamNextChunk();
-        });
-
-        stream.on("error", next);
-        stream.pipe(res, { end: false });
-      } catch (err) {
-        return next(err);
+      const chunkReplicas = chunksByIndex.get(currentChunk);
+      if (!chunkReplicas || chunkReplicas.length === 0) {
+        return next(new Error(`Chunk ${currentChunk} not found`));
       }
+
+      // Try each replica until one succeeds
+      let lastError: any = null;
+      for (const chunk of chunkReplicas) {
+        try {
+          const stream = await getChunkStream(chunk);
+
+          stream.on("end", () => {
+            currentChunk++;
+            streamNextChunk();
+          });
+
+          stream.on("error", next);
+          stream.pipe(res, { end: false });
+          return; // Successfully started streaming
+        } catch (err) {
+          lastError = err;
+          // Try next replica
+        }
+      }
+
+      // All replicas failed
+      return next(lastError || new Error(`Failed to fetch chunk ${currentChunk}`));
     };
 
     streamNextChunk();

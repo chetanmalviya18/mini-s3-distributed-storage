@@ -598,7 +598,8 @@ export const FileScalarFieldEnum = {
   size: 'size',
   publicId: 'publicId',
   fileHash: 'fileHash',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt'
 } as const
 
 export type FileScalarFieldEnum = (typeof FileScalarFieldEnum)[keyof typeof FileScalarFieldEnum]
