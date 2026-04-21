@@ -16,6 +16,12 @@ app.use(express.json());
 app.use("/api/files", fileRoutes);
 app.use("/api/logs", logRoutes);
 
+app.use((req, res, next) => {
+  req.setTimeout(0);
+  res.setTimeout(0);
+  next();
+});
+
 app.get("/", (req: Request, res: Response) => {
   res.send("Mini S3 is running 🚀");
 });

@@ -39,6 +39,7 @@ export type ChunkMinAggregateOutputType = {
   fileId: string | null
   chunkIndex: number | null
   path: string | null
+  node: string | null
 }
 
 export type ChunkMaxAggregateOutputType = {
@@ -46,6 +47,7 @@ export type ChunkMaxAggregateOutputType = {
   fileId: string | null
   chunkIndex: number | null
   path: string | null
+  node: string | null
 }
 
 export type ChunkCountAggregateOutputType = {
@@ -71,6 +73,7 @@ export type ChunkMinAggregateInputType = {
   fileId?: true
   chunkIndex?: true
   path?: true
+  node?: true
 }
 
 export type ChunkMaxAggregateInputType = {
@@ -78,6 +81,7 @@ export type ChunkMaxAggregateInputType = {
   fileId?: true
   chunkIndex?: true
   path?: true
+  node?: true
 }
 
 export type ChunkCountAggregateInputType = {
@@ -180,7 +184,7 @@ export type ChunkGroupByOutputType = {
   fileId: string
   chunkIndex: number
   path: string
-  node: string[]
+  node: string
   _count: ChunkCountAggregateOutputType | null
   _avg: ChunkAvgAggregateOutputType | null
   _sum: ChunkSumAggregateOutputType | null
@@ -211,7 +215,7 @@ export type ChunkWhereInput = {
   fileId?: Prisma.StringFilter<"Chunk"> | string
   chunkIndex?: Prisma.IntFilter<"Chunk"> | number
   path?: Prisma.StringFilter<"Chunk"> | string
-  node?: Prisma.StringNullableListFilter<"Chunk">
+  node?: Prisma.StringFilter<"Chunk"> | string
   file?: Prisma.XOR<Prisma.FileScalarRelationFilter, Prisma.FileWhereInput>
 }
 
@@ -232,7 +236,7 @@ export type ChunkWhereUniqueInput = Prisma.AtLeast<{
   fileId?: Prisma.StringFilter<"Chunk"> | string
   chunkIndex?: Prisma.IntFilter<"Chunk"> | number
   path?: Prisma.StringFilter<"Chunk"> | string
-  node?: Prisma.StringNullableListFilter<"Chunk">
+  node?: Prisma.StringFilter<"Chunk"> | string
   file?: Prisma.XOR<Prisma.FileScalarRelationFilter, Prisma.FileWhereInput>
 }, "id">
 
@@ -257,14 +261,14 @@ export type ChunkScalarWhereWithAggregatesInput = {
   fileId?: Prisma.StringWithAggregatesFilter<"Chunk"> | string
   chunkIndex?: Prisma.IntWithAggregatesFilter<"Chunk"> | number
   path?: Prisma.StringWithAggregatesFilter<"Chunk"> | string
-  node?: Prisma.StringNullableListFilter<"Chunk">
+  node?: Prisma.StringWithAggregatesFilter<"Chunk"> | string
 }
 
 export type ChunkCreateInput = {
   id?: string
   chunkIndex: number
   path: string
-  node?: Prisma.ChunkCreatenodeInput | string[]
+  node: string
   file: Prisma.FileCreateNestedOneWithoutChunksInput
 }
 
@@ -273,14 +277,14 @@ export type ChunkUncheckedCreateInput = {
   fileId: string
   chunkIndex: number
   path: string
-  node?: Prisma.ChunkCreatenodeInput | string[]
+  node: string
 }
 
 export type ChunkUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   path?: Prisma.StringFieldUpdateOperationsInput | string
-  node?: Prisma.ChunkUpdatenodeInput | string[]
+  node?: Prisma.StringFieldUpdateOperationsInput | string
   file?: Prisma.FileUpdateOneRequiredWithoutChunksNestedInput
 }
 
@@ -289,7 +293,7 @@ export type ChunkUncheckedUpdateInput = {
   fileId?: Prisma.StringFieldUpdateOperationsInput | string
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   path?: Prisma.StringFieldUpdateOperationsInput | string
-  node?: Prisma.ChunkUpdatenodeInput | string[]
+  node?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ChunkCreateManyInput = {
@@ -297,14 +301,14 @@ export type ChunkCreateManyInput = {
   fileId: string
   chunkIndex: number
   path: string
-  node?: Prisma.ChunkCreatenodeInput | string[]
+  node: string
 }
 
 export type ChunkUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   path?: Prisma.StringFieldUpdateOperationsInput | string
-  node?: Prisma.ChunkUpdatenodeInput | string[]
+  node?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ChunkUncheckedUpdateManyInput = {
@@ -312,7 +316,7 @@ export type ChunkUncheckedUpdateManyInput = {
   fileId?: Prisma.StringFieldUpdateOperationsInput | string
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   path?: Prisma.StringFieldUpdateOperationsInput | string
-  node?: Prisma.ChunkUpdatenodeInput | string[]
+  node?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ChunkListRelationFilter = {
@@ -323,14 +327,6 @@ export type ChunkListRelationFilter = {
 
 export type ChunkOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
-}
-
-export type StringNullableListFilter<$PrismaModel = never> = {
-  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
-  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
-  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
-  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
-  isEmpty?: boolean
 }
 
 export type ChunkCountOrderByAggregateInput = {
@@ -350,6 +346,7 @@ export type ChunkMaxOrderByAggregateInput = {
   fileId?: Prisma.SortOrder
   chunkIndex?: Prisma.SortOrder
   path?: Prisma.SortOrder
+  node?: Prisma.SortOrder
 }
 
 export type ChunkMinOrderByAggregateInput = {
@@ -357,6 +354,7 @@ export type ChunkMinOrderByAggregateInput = {
   fileId?: Prisma.SortOrder
   chunkIndex?: Prisma.SortOrder
   path?: Prisma.SortOrder
+  node?: Prisma.SortOrder
 }
 
 export type ChunkSumOrderByAggregateInput = {
@@ -405,10 +403,6 @@ export type ChunkUncheckedUpdateManyWithoutFileNestedInput = {
   deleteMany?: Prisma.ChunkScalarWhereInput | Prisma.ChunkScalarWhereInput[]
 }
 
-export type ChunkCreatenodeInput = {
-  set: string[]
-}
-
 export type IntFieldUpdateOperationsInput = {
   set?: number
   increment?: number
@@ -417,23 +411,18 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
-export type ChunkUpdatenodeInput = {
-  set?: string[]
-  push?: string | string[]
-}
-
 export type ChunkCreateWithoutFileInput = {
   id?: string
   chunkIndex: number
   path: string
-  node?: Prisma.ChunkCreatenodeInput | string[]
+  node: string
 }
 
 export type ChunkUncheckedCreateWithoutFileInput = {
   id?: string
   chunkIndex: number
   path: string
-  node?: Prisma.ChunkCreatenodeInput | string[]
+  node: string
 }
 
 export type ChunkCreateOrConnectWithoutFileInput = {
@@ -470,35 +459,35 @@ export type ChunkScalarWhereInput = {
   fileId?: Prisma.StringFilter<"Chunk"> | string
   chunkIndex?: Prisma.IntFilter<"Chunk"> | number
   path?: Prisma.StringFilter<"Chunk"> | string
-  node?: Prisma.StringNullableListFilter<"Chunk">
+  node?: Prisma.StringFilter<"Chunk"> | string
 }
 
 export type ChunkCreateManyFileInput = {
   id?: string
   chunkIndex: number
   path: string
-  node?: Prisma.ChunkCreatenodeInput | string[]
+  node: string
 }
 
 export type ChunkUpdateWithoutFileInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   path?: Prisma.StringFieldUpdateOperationsInput | string
-  node?: Prisma.ChunkUpdatenodeInput | string[]
+  node?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ChunkUncheckedUpdateWithoutFileInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   path?: Prisma.StringFieldUpdateOperationsInput | string
-  node?: Prisma.ChunkUpdatenodeInput | string[]
+  node?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ChunkUncheckedUpdateManyWithoutFileInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   chunkIndex?: Prisma.IntFieldUpdateOperationsInput | number
   path?: Prisma.StringFieldUpdateOperationsInput | string
-  node?: Prisma.ChunkUpdatenodeInput | string[]
+  node?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 
@@ -559,7 +548,7 @@ export type $ChunkPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     fileId: string
     chunkIndex: number
     path: string
-    node: string[]
+    node: string
   }, ExtArgs["result"]["chunk"]>
   composites: {}
 }
@@ -988,7 +977,7 @@ export interface ChunkFieldRefs {
   readonly fileId: Prisma.FieldRef<"Chunk", 'String'>
   readonly chunkIndex: Prisma.FieldRef<"Chunk", 'Int'>
   readonly path: Prisma.FieldRef<"Chunk", 'String'>
-  readonly node: Prisma.FieldRef<"Chunk", 'String[]'>
+  readonly node: Prisma.FieldRef<"Chunk", 'String'>
 }
     
 

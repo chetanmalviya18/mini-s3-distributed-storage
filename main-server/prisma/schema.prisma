@@ -20,11 +20,11 @@ model File {
 }
 
 model Chunk {
-  id         String   @id @default(uuid())
+  id         String @id @default(uuid())
   fileId     String
   chunkIndex Int
   path       String
-  node       String[]
+  node       String
 
   file File @relation(fields: [fileId], references: [id])
 }
