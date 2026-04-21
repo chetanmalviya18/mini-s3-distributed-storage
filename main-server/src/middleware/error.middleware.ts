@@ -7,7 +7,7 @@ export const globalErrorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
-  console.error("ERROR 💥:", err);
+  req.log.error("ERROR 💥:", err);
 
   // Multer Error
   if (err.name === "MulterError") {

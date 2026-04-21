@@ -1,11 +1,12 @@
 import cron from "node-cron";
 import { prisma } from "../config/prisma";
 import axios from "axios";
+import { logger } from "../utils/logger";
 
-console.log(`[Worker] Cleanup worker process started with PID: ${process.pid}`);
+logger.info(`[Worker] Cleanup worker process started with PID: ${process.pid}`);
 
 cron.schedule("* * * * *", async () => {
-  console.log("🧹 Running cleanup job...");
+  logger.info("Running cleanup job...");
 
   try {
     const expiredFiles = await prisma.file.findMany({
@@ -14,14 +15,14 @@ cron.schedule("* * * * *", async () => {
     });
 
     if (expiredFiles.length === 0) {
-      console.log("✅ No expired files found");
+      logger.info("No expired files found");
       return;
     }
 
     let deletedFileCount = 0;
 
     for (const file of expiredFiles) {
-      console.log(`📂 Processing file ${file.id}`);
+      logger.info(`Processing file ${file.id}`);
 
       let successCount = 0;
       let failedCount = 0;
@@ -31,35 +32,32 @@ cron.schedule("* * * * *", async () => {
         const nodeUrl = chunk.node;
 
         try {
-          console.log(`🗑 Deleting ${chunk.path} from ${nodeUrl}`);
+          logger.info(`Deleting ${chunk.path} from ${nodeUrl}`);
 
           await axios.delete(`${nodeUrl}/storage/chunk/${chunk.path}`, {
             timeout: 5000,
           });
 
-          console.log(`✅ Deleted from ${nodeUrl}`);
+          logger.info(`Deleted from ${nodeUrl}`);
           successCount++;
         } catch (err: any) {
           // Treat 404 as success since chunk is already gone
           if (err.response?.status === 404) {
-            console.log(`✅ Chunk already deleted from ${nodeUrl}`);
+            logger.info(`Chunk already deleted from ${nodeUrl}`);
             successCount++;
             continue;
           }
 
           // Treat 500 (EPERM/locked files) as retriable - don't mark as failed
           if (err.response?.status === 500) {
-            console.warn(
-              `⚠️ Temporary error on ${nodeUrl} for ${chunk.path}: ${err.message}`,
+            logger.warn(
+              `Temporary error on ${nodeUrl} for ${chunk.path}: ${err.message}`,
             );
             failedCount++;
             continue;
           }
 
-          console.error(
-            `❌ Failed on ${nodeUrl} for ${chunk.path}:`,
-            err.message,
-          );
+          logger.error(`Failed on ${nodeUrl} for ${chunk.path}:`, err.message);
 
           failedCount++;
         }
@@ -76,17 +74,20 @@ cron.schedule("* * * * *", async () => {
         });
 
         deletedFileCount++;
-        console.log(
-          `✅ File ${file.id} fully cleaned (${successCount} replicas deleted)`,
+        logger.info(
+          `File ${file.id} fully cleaned (${successCount} replicas deleted)`,
         );
       } else {
-        console.warn(
-          `⚠️ File ${file.id} has ${failedCount} chunks that couldn't be deleted. It will be retried in the next cleanup cycle.`,
+        logger.warn(
+          `File ${file.id} has ${failedCount} chunks that couldn't be deleted. It will be retried in the next cleanup cycle.`,
         );
       }
     }
-    console.log(`✅ Cleanup complete: ${deletedFileCount} files deleted`);
+    logger.info({
+      deletedFiles: deletedFileCount,
+      message: "Cleanup complete",
+    });
   } catch (error) {
-    console.error("❌ Error occurred while running cleanup job:", error);
+    logger.error(error, "Error occurred while running cleanup job");
   }
 });

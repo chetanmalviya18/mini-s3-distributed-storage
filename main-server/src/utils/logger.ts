@@ -1,18 +1,22 @@
-type Log = {
-  message: string;
-  time: string;
-};
+import pino from "pino";
 
-let logs: Log[] = [];
+const isProd = process.env.NODE_ENV === "production";
 
-export const addLog = (message: string) => {
-  logs.push({
-    message,
-    time: new Date().toLocaleTimeString(),
-  });
+export const logger = pino({
+  level: "info",
+  ...(isProd
+    ? {}
+    : {
+        transport: {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+            translateTime: "SYS:standard",
+          },
+        },
+      }),
+});
 
-  // keep only last 50 logs
-  if (logs.length > 50) logs.shift();
-};
-
-export const getLogs = () => logs;
+export const workLogger = logger.child({
+  service: "cleanup-worker",
+});

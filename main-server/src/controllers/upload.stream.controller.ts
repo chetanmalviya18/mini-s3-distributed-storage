@@ -4,6 +4,7 @@ import crypto from "crypto";
 import { prisma } from "../config/prisma";
 import { v4 as uuidv4 } from "uuid";
 import { uploadChunkToNodeBuffer } from "./upload.controller";
+import { logger } from "../utils/logger";
 
 const CHUNK_SIZE = 5 * 1024 * 1024;
 
@@ -31,11 +32,11 @@ export const uploadStreamController = (req: Request, res: Response) => {
         buffer = buffer.slice(CHUNK_SIZE);
 
         const currentIndex = chunkIndex++;
-        console.log(`🚀 Uploading chunk ${currentIndex}`);
+        logger.info({ currentIndex }, "Uploading chunk");
 
         const result = await uploadChunkToNodeBuffer(chunk, currentIndex);
         chunkResults.push(...result);
-        console.log(`✅ Chunk ${currentIndex} uploaded`);
+        logger.info({ currentIndex }, "Chunk uploaded");
       }
     } catch (err) {
       console.error("Chunk processing error:", err);
@@ -118,7 +119,7 @@ export const uploadStreamController = (req: Request, res: Response) => {
           link: `${process.env.FRONTEND_URL}/file/${publicId}`,
         });
       } catch (error) {
-        console.error("Upload processing error:", error);
+        logger.error(error, "Upload processing error");
         res.status(500).json({ message: "Upload failed" });
       }
     });
