@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { NextFunction, Router, Request, Response } from "express";
 import { prisma } from "../config/prisma";
 import { serializeBigInt } from "../utils/serializer";
 import { uploadStreamController } from "../controllers/upload.stream.controller";
@@ -22,7 +22,13 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.route("/upload").post(uploadStreamController);
+const noTimeOut = (req: Request, res: Response, next: NextFunction) => {
+  req.setTimeout(0);
+  res.setTimeout(0);
+  next();
+};
+
+router.route("/upload").post(noTimeOut, uploadStreamController);
 
 router.route("/download/:id").get(downloadFile);
 

@@ -2,6 +2,8 @@ import cron from "node-cron";
 import { prisma } from "../config/prisma";
 import axios from "axios";
 
+console.log(`[Worker] Cleanup worker process started with PID: ${process.pid}`);
+
 cron.schedule("* * * * *", async () => {
   console.log("🧹 Running cleanup job...");
 
@@ -26,7 +28,7 @@ cron.schedule("* * * * *", async () => {
 
       for (const chunk of file.chunks) {
         // chunk.node is now a single-element array with one node URL
-        const nodeUrl = chunk.node[0];
+        const nodeUrl = chunk.node;
 
         try {
           console.log(`🗑 Deleting ${chunk.path} from ${nodeUrl}`);

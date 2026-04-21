@@ -99,7 +99,7 @@ export const splitFileIntoChunks = async (
 
 export const getChunkStream = async (chunk: any) => {
   // chunk.node is now a single-element array with one node URL
-  const nodeUrl = chunk.node[0];
+  const nodeUrl = chunk.node;
 
   try {
     console.log(`Trying node: ${nodeUrl}`);

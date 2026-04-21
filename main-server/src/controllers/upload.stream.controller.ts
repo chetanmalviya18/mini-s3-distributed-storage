@@ -3,11 +3,9 @@ import Busboy from "busboy";
 import crypto from "crypto";
 import { prisma } from "../config/prisma";
 import { v4 as uuidv4 } from "uuid";
-import { uploadChunkToNode } from "../services/chunk.service";
-import { addLog } from "../utils/logger";
 import { uploadChunkToNodeBuffer } from "./upload.controller";
 
-const CHUNK_SIZE = 10 * 1024 * 1024;
+const CHUNK_SIZE = 5 * 1024 * 1024;
 
 export const uploadStreamController = (req: Request, res: Response) => {
   const busboy = Busboy({ headers: req.headers });
@@ -21,82 +19,108 @@ export const uploadStreamController = (req: Request, res: Response) => {
   const chunkResults: { node: string; filename: string; chunkIndex: number }[] =
     [];
 
-  busboy.on("file", (_, file, info) => {
-    const { filename } = info;
+  let isProcessing = false;
 
-    file.pause();
-    file.on("data", async (data: Buffer) => {
-      hash.update(data);
-      totalSize += data.length;
+  const processChunks = async () => {
+    if (isProcessing) return;
+    isProcessing = true;
 
-      buffer = Buffer.concat([buffer, data]);
-
+    try {
       while (buffer.length >= CHUNK_SIZE) {
         const chunk = buffer.slice(0, CHUNK_SIZE);
         buffer = buffer.slice(CHUNK_SIZE);
 
         const currentIndex = chunkIndex++;
+        console.log(`🚀 Uploading chunk ${currentIndex}`);
 
-        try {
-          const result = await uploadChunkToNodeBuffer(chunk, currentIndex);
-          chunkResults.push(...result);
-          console.log(`Chunk ${currentIndex} uploaded`);
-        } catch (err) {
-          console.error(`Chunk ${currentIndex} upload failed:`, err);
-          file.destroy();
-          return res.status(500).json({ message: "Chunk upload failed" });
-        }
+        const result = await uploadChunkToNodeBuffer(chunk, currentIndex);
+        chunkResults.push(...result);
+        console.log(`✅ Chunk ${currentIndex} uploaded`);
       }
+    } catch (err) {
+      console.error("Chunk processing error:", err);
+      throw err;
+    } finally {
+      isProcessing = false;
+    }
+  };
 
-      file.resume();
+  busboy.on("file", (_, file, info) => {
+    const { filename } = info;
+
+    file.on("data", (data: Buffer) => {
+      file.pause();
+
+      hash.update(data);
+      totalSize += data.length;
+
+      buffer = Buffer.concat([buffer, data]);
+
+      processChunks().finally(() => {
+        file.resume();
+      });
     });
 
     file.on("end", async () => {
-      // Remaining chunk
-      if (buffer.length > 0) {
-        const result = await uploadChunkToNodeBuffer(buffer, chunkIndex++);
-        chunkResults.push(...result);
-      }
+      try {
+        await processChunks();
 
-      const fileHash = hash.digest("hex");
+        if (buffer.length > 0) {
+          try {
+            const result = await uploadChunkToNodeBuffer(buffer, chunkIndex++);
+            chunkResults.push(...result);
+          } catch (error) {
+            console.error(`Final chunk upload failed:`, error);
+            file.destroy();
+            return res
+              .status(500)
+              .json({ message: "Final chunk upload failed" });
+          }
+        }
 
-      // 🔥 Dedup check
-      const existing = await prisma.file.findUnique({
-        where: { fileHash },
-      });
+        const fileHash = hash.digest("hex");
 
-      if (existing) {
-        return res.json({
-          message: "Duplicate file",
-          link: `${process.env.FRONTEND_URL}/file/${existing.publicId}`,
+        // 🔥 Dedup check
+        const existing = await prisma.file.findUnique({
+          where: { fileHash },
         });
+
+        if (existing) {
+          return res.json({
+            message: "Duplicate file",
+            link: `${process.env.FRONTEND_URL}/file/${existing.publicId}`,
+          });
+        }
+
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+        const fileRecord = await prisma.file.create({
+          data: {
+            originalName: filename,
+            size: BigInt(totalSize),
+            publicId,
+            fileHash,
+            expiresAt,
+          },
+        });
+
+        await prisma.chunk.createMany({
+          data: chunkResults.map((c) => ({
+            fileId: fileRecord.id,
+            chunkIndex: c.chunkIndex,
+            path: c.filename,
+            node: c.node,
+          })),
+        });
+
+        res.json({
+          message: "Upload complete",
+          link: `${process.env.FRONTEND_URL}/file/${publicId}`,
+        });
+      } catch (error) {
+        console.error("Upload processing error:", error);
+        res.status(500).json({ message: "Upload failed" });
       }
-
-      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-      const fileRecord = await prisma.file.create({
-        data: {
-          originalName: filename,
-          size: BigInt(totalSize),
-          publicId,
-          fileHash,
-          expiresAt,
-        },
-      });
-
-      await prisma.chunk.createMany({
-        data: chunkResults.map((c) => ({
-          fileId: fileRecord.id,
-          chunkIndex: c.chunkIndex,
-          path: c.filename,
-          node: c.node,
-        })),
-      });
-
-      res.json({
-        message: "Upload complete",
-        link: `${process.env.FRONTEND_URL}/file/${publicId}`,
-      });
     });
   });
 
